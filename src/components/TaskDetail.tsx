@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import {
   Form,
@@ -31,7 +30,6 @@ import { useAuth } from '@/contexts/AuthContext';
 const taskSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
-  status: z.enum(['pending', 'in-progress', 'completed']),
   assignedTo: z.string(),
 });
 
@@ -63,7 +61,6 @@ const TaskDetail: React.FC<TaskDetailProps> = ({ task, onClose }) => {
     defaultValues: {
       title: task.title,
       description: task.description,
-      status: task.status,
       assignedTo: task.assignedTo,
     },
   });
@@ -76,20 +73,6 @@ const TaskDetail: React.FC<TaskDetailProps> = ({ task, onClose }) => {
   const getWorkerName = (id: string) => {
     const worker = workers.find(w => w.id === id);
     return worker ? worker.name : 'Unknown Worker';
-  };
-
-  // Status badge styling
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Pending</Badge>;
-      case 'in-progress':
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">In Progress</Badge>;
-      case 'completed':
-        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Completed</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
   };
 
   if (isEditing) {
@@ -119,29 +102,6 @@ const TaskDetail: React.FC<TaskDetailProps> = ({ task, onClose }) => {
                 <FormControl>
                   <Textarea className="min-h-32" {...field} />
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Status</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="in-progress">In Progress</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                  </SelectContent>
-                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -192,9 +152,6 @@ const TaskDetail: React.FC<TaskDetailProps> = ({ task, onClose }) => {
       <div>
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-lg font-semibold">{task.title}</h3>
-          <div className="flex gap-2">
-            {getStatusBadge(task.status)}
-          </div>
         </div>
         <p className="text-sm text-gray-600 whitespace-pre-line mb-4">{task.description}</p>
       </div>

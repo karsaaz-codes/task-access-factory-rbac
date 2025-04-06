@@ -29,7 +29,6 @@ import { useAuth } from '@/contexts/AuthContext';
 const taskSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
-  status: z.enum(['pending', 'in-progress', 'completed']),
   assignedTo: z.string(),
 });
 
@@ -56,7 +55,6 @@ const TaskForm: React.FC<TaskFormProps> = ({ onClose, defaultAssignedTo }) => {
     defaultValues: {
       title: '',
       description: '',
-      status: 'pending',
       assignedTo: defaultAssignedTo || (hasPermission('add_task_to_any') ? '' : user?.id || ''),
     },
   });
@@ -68,7 +66,6 @@ const TaskForm: React.FC<TaskFormProps> = ({ onClose, defaultAssignedTo }) => {
     createTask({
       title: data.title,
       description: data.description,
-      status: data.status,
       assignedTo: data.assignedTo,
       createdBy: user.id
     });
@@ -106,29 +103,6 @@ const TaskForm: React.FC<TaskFormProps> = ({ onClose, defaultAssignedTo }) => {
                   {...field}
                 />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="in-progress">In Progress</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                </SelectContent>
-              </Select>
               <FormMessage />
             </FormItem>
           )}

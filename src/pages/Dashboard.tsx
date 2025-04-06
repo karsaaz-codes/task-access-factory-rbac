@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import {
   DropdownMenu,
@@ -17,7 +16,7 @@ import { format } from 'date-fns';
 import DashboardLayout from '@/components/DashboardLayout';
 import TaskForm from '@/components/TaskForm';
 import TaskDetail from '@/components/TaskDetail';
-import { CheckCircle2, Clock, ListPlus, MoreVertical, AlertCircle } from 'lucide-react';
+import { ListPlus, MoreVertical } from 'lucide-react';
 
 const Dashboard = () => {
   const { userTasks } = useTask();
@@ -27,10 +26,6 @@ const Dashboard = () => {
   const [isTaskDetailOpen, setIsTaskDetailOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
   const { deleteTask } = useTask();
-
-  const pendingTasks = userTasks.filter(task => task.status === 'pending');
-  const inProgressTasks = userTasks.filter(task => task.status === 'in-progress');
-  const completedTasks = userTasks.filter(task => task.status === 'completed');
 
   const handleDeleteConfirm = () => {
     if (taskToDelete) {
@@ -44,24 +39,10 @@ const Dashboard = () => {
     setIsTaskDetailOpen(true);
   };
 
-  // Status badge styling
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Pending</Badge>;
-      case 'in-progress':
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">In Progress</Badge>;
-      case 'completed':
-        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Completed</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
-
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Header and stats */}
+        {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold">Welcome, {user?.name}</h1>
@@ -86,51 +67,23 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Stats cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="py-4">
-              <CardTitle className="text-base font-medium flex items-center">
-                <Clock className="h-5 w-5 mr-2 text-amber-500" />
-                Pending Tasks
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold">{pendingTasks.length}</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="py-4">
-              <CardTitle className="text-base font-medium flex items-center">
-                <AlertCircle className="h-5 w-5 mr-2 text-blue-500" />
-                In Progress
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold">{inProgressTasks.length}</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="py-4">
-              <CardTitle className="text-base font-medium flex items-center">
-                <CheckCircle2 className="h-5 w-5 mr-2 text-green-500" />
-                Completed
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold">{completedTasks.length}</p>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Task count card */}
+        <Card>
+          <CardHeader className="py-4">
+            <CardTitle className="text-base font-medium flex items-center">
+              Your Tasks
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{userTasks.length}</p>
+          </CardContent>
+        </Card>
 
         {/* All Tasks */}
         <div>
           <h2 className="text-lg font-semibold mb-4">Your Tasks</h2>
           <TaskListContent 
             tasks={userTasks} 
-            getStatusBadge={getStatusBadge}
             onTaskClick={handleOpenTaskDetail}
             setTaskToDelete={setTaskToDelete}
           />
@@ -171,10 +124,9 @@ const Dashboard = () => {
 // Task list component
 const TaskListContent: React.FC<{
   tasks: Task[];
-  getStatusBadge: (status: string) => React.ReactNode;
   onTaskClick: (task: Task) => void;
   setTaskToDelete: (taskId: string) => void;
-}> = ({ tasks, getStatusBadge, onTaskClick, setTaskToDelete }) => {
+}> = ({ tasks, onTaskClick, setTaskToDelete }) => {
   if (tasks.length === 0) {
     return (
       <Card>
@@ -197,7 +149,6 @@ const TaskListContent: React.FC<{
                 <div className="flex-1" onClick={() => onTaskClick(task)}>
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-medium">{task.title}</h3>
-                    {getStatusBadge(task.status)}
                   </div>
                   <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{task.description}</p>
                   <div className="text-xs text-muted-foreground">

@@ -3,14 +3,13 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTask, Task } from '@/contexts/TaskContext';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/DashboardLayout';
 import TaskForm from '@/components/TaskForm';
 import TaskDetail from '@/components/TaskDetail';
-import { User, PlusCircle, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { User, PlusCircle } from 'lucide-react';
 import { format } from 'date-fns';
 
 const WorkerManagement = () => {
@@ -56,16 +55,8 @@ const WorkerManagement = () => {
     return tasks.filter(task => task.assignedTo === workerId);
   };
 
-  const getPendingTaskCount = (workerId: string) => {
-    return tasks.filter(task => task.assignedTo === workerId && task.status === 'pending').length;
-  };
-
-  const getInProgressTaskCount = (workerId: string) => {
-    return tasks.filter(task => task.assignedTo === workerId && task.status === 'in-progress').length;
-  };
-
-  const getCompletedTaskCount = (workerId: string) => {
-    return tasks.filter(task => task.assignedTo === workerId && task.status === 'completed').length;
+  const getTaskCount = (workerId: string) => {
+    return tasks.filter(task => task.assignedTo === workerId).length;
   };
 
   const handleOpenTaskDetail = (task: Task) => {
@@ -76,20 +67,6 @@ const WorkerManagement = () => {
   const handleCreateTaskForWorker = (workerId: string) => {
     setSelectedUserId(workerId);
     setIsTaskFormOpen(true);
-  };
-
-  // Status badge styling
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Pending</Badge>;
-      case 'in-progress':
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">In Progress</Badge>;
-      case 'completed':
-        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Completed</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
   };
 
   return (
@@ -124,16 +101,7 @@ const WorkerManagement = () => {
                 
                 <div className="flex flex-wrap gap-2 mt-3">
                   <div className="flex items-center gap-1 text-sm">
-                    <Clock className="h-4 w-4 text-amber-500" />
-                    <span>Pending: {getPendingTaskCount(worker.id)}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-sm">
-                    <AlertCircle className="h-4 w-4 text-blue-500" />
-                    <span>In Progress: {getInProgressTaskCount(worker.id)}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-sm">
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    <span>Completed: {getCompletedTaskCount(worker.id)}</span>
+                    <span>Total Tasks: {getTaskCount(worker.id)}</span>
                   </div>
                 </div>
               </CardHeader>
@@ -149,7 +117,6 @@ const WorkerManagement = () => {
                         >
                           <div className="flex items-center gap-2 mb-1">
                             <h3 className="font-medium">{task.title}</h3>
-                            {getStatusBadge(task.status)}
                           </div>
                           <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                             {task.description}
