@@ -64,7 +64,14 @@ const TaskForm: React.FC<TaskFormProps> = ({ onClose, defaultAssignedTo }) => {
   });
 
   const onSubmit = (data: TaskFormValues) => {
-    createTask(data);
+    if (!user) return;
+    
+    // Add the createdBy property to fulfill the Task type requirements
+    createTask({
+      ...data,
+      createdBy: user.id // Adding the missing createdBy property
+    });
+    
     onClose();
   };
 
