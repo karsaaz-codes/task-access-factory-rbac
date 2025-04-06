@@ -8,6 +8,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { TaskProvider } from "./contexts/TaskContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import WorkerManagement from "./pages/WorkerManagement";
 import NotFound from "./pages/NotFound";
@@ -28,6 +29,7 @@ const App = () => (
               
               {/* Public routes */}
               <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
               
               {/* Protected routes */}
               <Route 

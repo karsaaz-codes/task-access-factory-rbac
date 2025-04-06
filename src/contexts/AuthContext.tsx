@@ -19,6 +19,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  register: (name: string, email: string, password: string) => Promise<void>;
   hasPermission: (action: string) => boolean;
 }
 
@@ -68,6 +69,11 @@ const PERMISSIONS = {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [users, setUsers] = useState<typeof MOCK_USERS>(() => {
+    // Initialize users from localStorage if available
+    const savedUsers = localStorage.getItem('factory_users');
+    return savedUsers ? JSON.parse(savedUsers) : MOCK_USERS;
+  });
 
   useEffect(() => {
     // Check for saved auth
@@ -78,11 +84,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
   }, []);
 
+  // Save users to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('factory_users', JSON.stringify(users));
+  }, [users]);
+
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     
-    // Simulate API call with mock users
-    const foundUser = MOCK_USERS.find(
+    // Find user in our users array (which may include newly registered users)
+    const foundUser = users.find(
       (u) => u.email === email && u.password === password
     );
 
@@ -110,6 +121,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
+  const register = async (name: string, email: string, password: string) => {
+    setIsLoading(true);
+    
+    // Check if email already exists
+    if (users.some(u => u.email === email)) {
+      setIsLoading(false);
+      throw new Error('Email already in use');
+    }
+
+    // Create new user with worker role
+    const newUser = {
+      id: `${users.length + 1}`,
+      name,
+      email,
+      password,
+      role: 'worker' as UserRole,
+    };
+
+    // Add to users array
+    setUsers(prevUsers => [...prevUsers, newUser]);
+    
+    setIsLoading(false);
+  };
+
   const hasPermission = (action: string) => {
     if (!user) return false;
     return PERMISSIONS[user.role].includes(action);
@@ -123,6 +158,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         login,
         logout,
+        register,
         hasPermission,
       }}
     >

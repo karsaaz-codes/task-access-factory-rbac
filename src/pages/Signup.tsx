@@ -10,39 +10,41 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useAuth } from '@/contexts/AuthContext';
-import { Factory, Lock } from 'lucide-react';
+import { Factory, UserPlus } from 'lucide-react';
 
 // Form schema using zod
-const loginSchema = z.object({
+const signupSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type SignupFormValues = z.infer<typeof signupSchema>;
 
-const Login = () => {
-  const { login } = useAuth();
+const Signup = () => {
+  const { register } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
   // Initialize form with react-hook-form and zod validation
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<SignupFormValues>({
+    resolver: zodResolver(signupSchema),
     defaultValues: {
+      name: '',
       email: '',
       password: '',
     },
   });
 
   // Handle form submission
-  const onSubmit = async (data: LoginFormValues) => {
+  const onSubmit = async (data: SignupFormValues) => {
     setIsLoading(true);
     try {
-      await login(data.email, data.password);
-      toast.success('Logged in successfully');
-      navigate('/dashboard');
+      await register(data.name, data.email, data.password);
+      toast.success('Account created successfully! You can now log in.');
+      navigate('/login');
     } catch (error) {
-      toast.error('Invalid email or password');
+      toast.error('Failed to create account. The email may already be in use.');
     } finally {
       setIsLoading(false);
     }
@@ -59,9 +61,9 @@ const Login = () => {
         
         <Card className="border-none shadow-lg">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Factory Task Management</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">Create an Account</CardTitle>
             <CardDescription className="text-center">
-              Enter your credentials to access your account
+              Enter your details to register a new account
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -69,12 +71,25 @@ const Login = () => {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="John Doe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="worker1@factory.com" {...field} />
+                        <Input placeholder="worker@factory.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -97,32 +112,24 @@ const Login = () => {
                   {isLoading ? (
                     <span className="flex items-center gap-2">
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                      Logging in...
+                      Creating account...
                     </span>
                   ) : (
                     <span className="flex items-center gap-2">
-                      <Lock className="h-4 w-4" />
-                      Login
+                      <UserPlus className="h-4 w-4" />
+                      Sign Up
                     </span>
                   )}
                 </Button>
               </form>
             </Form>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            <div className="text-center pb-2">
-              <span className="text-sm text-muted-foreground">
-                Don't have an account?{' '}
-                <Link to="/signup" className="text-factory-blue hover:underline">
-                  Sign up
-                </Link>
-              </span>
-            </div>
-            <div className="text-sm text-muted-foreground mt-2">
-              <div className="font-semibold mb-1">Demo Accounts:</div>
-              <div>Worker: worker1@factory.com / password123</div>
-              <div>Worker: worker2@factory.com / password123</div>
-              <div>Admin: admin@factory.com / admin123</div>
+          <CardFooter className="flex justify-center">
+            <div className="text-sm text-muted-foreground">
+              Already have an account?{' '}
+              <Link to="/login" className="text-factory-blue hover:underline">
+                Log in
+              </Link>
             </div>
           </CardFooter>
         </Card>
@@ -131,4 +138,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;
