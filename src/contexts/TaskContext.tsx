@@ -9,7 +9,6 @@ export interface Task {
   title: string;
   description: string;
   status: 'pending' | 'in-progress' | 'completed';
-  priority: 'low' | 'medium' | 'high';
   assignedTo: string; // user ID
   createdBy: string; // user ID
   createdAt: string;
@@ -32,7 +31,6 @@ const INITIAL_TASKS: Task[] = [
     title: 'Inspect Assembly Line A',
     description: 'Perform routine inspection of Assembly Line A and report any issues.',
     status: 'pending',
-    priority: 'high',
     assignedTo: '1', // Assigned to John Worker
     createdBy: '3', // Created by Admin Manager
     createdAt: new Date(Date.now() - 86400000).toISOString(), // Yesterday
@@ -43,7 +41,6 @@ const INITIAL_TASKS: Task[] = [
     title: 'Maintenance on Machine B',
     description: 'Perform scheduled maintenance on Machine B following standard procedure.',
     status: 'in-progress',
-    priority: 'medium',
     assignedTo: '2', // Assigned to Jane Worker
     createdBy: '3', // Created by Admin Manager
     createdAt: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
@@ -54,7 +51,6 @@ const INITIAL_TASKS: Task[] = [
     title: 'Update Safety Documentation',
     description: 'Review and update safety procedures for the new equipment.',
     status: 'completed',
-    priority: 'medium',
     assignedTo: '1', // Assigned to John Worker
     createdBy: '1', // Created by John Worker (own task)
     createdAt: new Date(Date.now() - 345600000).toISOString(), // 4 days ago
@@ -65,7 +61,6 @@ const INITIAL_TASKS: Task[] = [
     title: 'Inventory Check',
     description: 'Perform monthly inventory check of raw materials.',
     status: 'pending',
-    priority: 'low',
     assignedTo: '2', // Assigned to Jane Worker
     createdBy: '2', // Created by Jane Worker (own task)
     createdAt: new Date(Date.now() - 86400000).toISOString(), // Yesterday

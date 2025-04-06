@@ -3,45 +3,30 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Separator } from '@/components/ui/separator';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useTask, Task } from '@/contexts/TaskContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import DashboardLayout from '@/components/DashboardLayout';
 import TaskForm from '@/components/TaskForm';
 import TaskDetail from '@/components/TaskDetail';
-import { CheckCircle2, Clock, Filter, ListPlus, MoreVertical, AlertCircle } from 'lucide-react';
+import { CheckCircle2, Clock, ListPlus, MoreVertical, AlertCircle } from 'lucide-react';
 
 const Dashboard = () => {
   const { userTasks } = useTask();
-  const { user, hasPermission } = useAuth();
+  const { user } = useAuth();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [filterStatus, setFilterStatus] = useState<string | null>(null);
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const [isTaskDetailOpen, setIsTaskDetailOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
   const { deleteTask } = useTask();
-
-  // Filter and sort tasks
-  const filteredTasks = userTasks
-    .filter(task => !filterStatus || task.status === filterStatus)
-    .sort((a, b) => {
-      if (sortOrder === 'desc') {
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      } else {
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      }
-    });
 
   const pendingTasks = userTasks.filter(task => task.status === 'pending');
   const inProgressTasks = userTasks.filter(task => task.status === 'in-progress');
@@ -73,20 +58,6 @@ const Dashboard = () => {
     }
   };
 
-  // Priority badge styling
-  const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case 'low':
-        return <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-100">Low</Badge>;
-      case 'medium':
-        return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">Medium</Badge>;
-      case 'high':
-        return <Badge className="bg-red-100 text-red-700 hover:bg-red-100">High</Badge>;
-      default:
-        return <Badge>{priority}</Badge>;
-    }
-  };
-
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -98,33 +69,6 @@ const Dashboard = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="flex items-center gap-1">
-                  <Filter className="h-4 w-4" />
-                  <span>Filter</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setFilterStatus(null)} className={!filterStatus ? 'bg-accent/50' : ''}>
-                  All Tasks
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilterStatus('pending')} className={filterStatus === 'pending' ? 'bg-accent/50' : ''}>
-                  Pending
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilterStatus('in-progress')} className={filterStatus === 'in-progress' ? 'bg-accent/50' : ''}>
-                  In Progress
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilterStatus('completed')} className={filterStatus === 'completed' ? 'bg-accent/50' : ''}>
-                  Completed
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <Button variant="outline" size="sm" onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}>
-              Sort: {sortOrder === 'asc' ? 'Oldest' : 'Newest'}
-            </Button>
-
             <Dialog open={isTaskFormOpen} onOpenChange={setIsTaskFormOpen}>
               <DialogTrigger asChild>
                 <Button size="sm" className="bg-factory-blue hover:bg-factory-blue/90">
@@ -181,55 +125,16 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Tasks */}
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="all">All Tasks ({filteredTasks.length})</TabsTrigger>
-            <TabsTrigger value="pending">Pending ({pendingTasks.length})</TabsTrigger>
-            <TabsTrigger value="in-progress">In Progress ({inProgressTasks.length})</TabsTrigger>
-            <TabsTrigger value="completed">Completed ({completedTasks.length})</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="all">
-            <TaskListContent 
-              tasks={filteredTasks} 
-              getStatusBadge={getStatusBadge} 
-              getPriorityBadge={getPriorityBadge} 
-              onTaskClick={handleOpenTaskDetail}
-              setTaskToDelete={setTaskToDelete}
-            />
-          </TabsContent>
-          
-          <TabsContent value="pending">
-            <TaskListContent 
-              tasks={pendingTasks} 
-              getStatusBadge={getStatusBadge} 
-              getPriorityBadge={getPriorityBadge} 
-              onTaskClick={handleOpenTaskDetail}
-              setTaskToDelete={setTaskToDelete}
-            />
-          </TabsContent>
-          
-          <TabsContent value="in-progress">
-            <TaskListContent 
-              tasks={inProgressTasks} 
-              getStatusBadge={getStatusBadge} 
-              getPriorityBadge={getPriorityBadge} 
-              onTaskClick={handleOpenTaskDetail}
-              setTaskToDelete={setTaskToDelete}
-            />
-          </TabsContent>
-          
-          <TabsContent value="completed">
-            <TaskListContent 
-              tasks={completedTasks} 
-              getStatusBadge={getStatusBadge} 
-              getPriorityBadge={getPriorityBadge} 
-              onTaskClick={handleOpenTaskDetail}
-              setTaskToDelete={setTaskToDelete}
-            />
-          </TabsContent>
-        </Tabs>
+        {/* All Tasks */}
+        <div>
+          <h2 className="text-lg font-semibold mb-4">Your Tasks</h2>
+          <TaskListContent 
+            tasks={userTasks} 
+            getStatusBadge={getStatusBadge}
+            onTaskClick={handleOpenTaskDetail}
+            setTaskToDelete={setTaskToDelete}
+          />
+        </div>
       </div>
 
       {/* Task Detail Dialog */}
@@ -267,10 +172,9 @@ const Dashboard = () => {
 const TaskListContent: React.FC<{
   tasks: Task[];
   getStatusBadge: (status: string) => React.ReactNode;
-  getPriorityBadge: (priority: string) => React.ReactNode;
   onTaskClick: (task: Task) => void;
   setTaskToDelete: (taskId: string) => void;
-}> = ({ tasks, getStatusBadge, getPriorityBadge, onTaskClick, setTaskToDelete }) => {
+}> = ({ tasks, getStatusBadge, onTaskClick, setTaskToDelete }) => {
   if (tasks.length === 0) {
     return (
       <Card>
@@ -294,7 +198,6 @@ const TaskListContent: React.FC<{
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-medium">{task.title}</h3>
                     {getStatusBadge(task.status)}
-                    {getPriorityBadge(task.priority)}
                   </div>
                   <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{task.description}</p>
                   <div className="text-xs text-muted-foreground">

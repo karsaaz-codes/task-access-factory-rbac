@@ -92,20 +92,6 @@ const WorkerManagement = () => {
     }
   };
 
-  // Priority badge styling
-  const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case 'low':
-        return <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-100">Low</Badge>;
-      case 'medium':
-        return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">Medium</Badge>;
-      case 'high':
-        return <Badge className="bg-red-100 text-red-700 hover:bg-red-100">High</Badge>;
-      default:
-        return <Badge>{priority}</Badge>;
-    }
-  };
-
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -164,7 +150,6 @@ const WorkerManagement = () => {
                           <div className="flex items-center gap-2 mb-1">
                             <h3 className="font-medium">{task.title}</h3>
                             {getStatusBadge(task.status)}
-                            {getPriorityBadge(task.priority)}
                           </div>
                           <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                             {task.description}

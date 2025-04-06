@@ -32,7 +32,6 @@ const taskSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
   status: z.enum(['pending', 'in-progress', 'completed']),
-  priority: z.enum(['low', 'medium', 'high']),
   assignedTo: z.string(),
 });
 
@@ -65,7 +64,6 @@ const TaskDetail: React.FC<TaskDetailProps> = ({ task, onClose }) => {
       title: task.title,
       description: task.description,
       status: task.status,
-      priority: task.priority,
       assignedTo: task.assignedTo,
     },
   });
@@ -91,20 +89,6 @@ const TaskDetail: React.FC<TaskDetailProps> = ({ task, onClose }) => {
         return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Completed</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
-    }
-  };
-
-  // Priority badge styling
-  const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case 'low':
-        return <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-100">Low</Badge>;
-      case 'medium':
-        return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">Medium</Badge>;
-      case 'high':
-        return <Badge className="bg-red-100 text-red-700 hover:bg-red-100">High</Badge>;
-      default:
-        return <Badge>{priority}</Badge>;
     }
   };
 
@@ -140,53 +124,28 @@ const TaskDetail: React.FC<TaskDetailProps> = ({ task, onClose }) => {
             )}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="in-progress">In Progress</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="priority"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Priority</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select priority" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Status</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="in-progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           {hasPermission('add_task_to_any') && (
             <FormField
@@ -235,7 +194,6 @@ const TaskDetail: React.FC<TaskDetailProps> = ({ task, onClose }) => {
           <h3 className="text-lg font-semibold">{task.title}</h3>
           <div className="flex gap-2">
             {getStatusBadge(task.status)}
-            {getPriorityBadge(task.priority)}
           </div>
         </div>
         <p className="text-sm text-gray-600 whitespace-pre-line mb-4">{task.description}</p>
