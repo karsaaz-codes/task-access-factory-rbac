@@ -66,10 +66,14 @@ const TaskForm: React.FC<TaskFormProps> = ({ onClose, defaultAssignedTo }) => {
   const onSubmit = (data: TaskFormValues) => {
     if (!user) return;
     
-    // Add the createdBy property to fulfill the Task type requirements
+    // Since we've validated with zod schema, all required properties should be present
     createTask({
-      ...data,
-      createdBy: user.id // Adding the missing createdBy property
+      title: data.title,
+      description: data.description,
+      status: data.status,
+      priority: data.priority,
+      assignedTo: data.assignedTo,
+      createdBy: user.id
     });
     
     onClose();
